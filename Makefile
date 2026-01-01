@@ -17,7 +17,7 @@ MAX_CONCURRENT ?= 16
 MAX_TOKENS ?= 512
 TEMPERATURE ?= 0.0
 TOP_P ?= 1.0
-RETRIES ?= 3
+RETRIES ?= 5
 
 help:
 	@echo "bulk-llm-inference"

@@ -155,14 +155,17 @@ async def _infer_rows_async(
                 "sentiment_score": float(parsed.get("sentiment_score")),
                 "sentiment_confidence": float(parsed.get("sentiment_confidence")),
                 "parse_error": "",
+                "attempts_made": 1,
             }
 
         last_err: Exception | None = None
         last_response_payload: str = ""
         last_main_response: str = ""
         last_reasoning_response: str = ""
+        last_attempt: int = 0
 
         for attempt in range(retries + 1):
+            last_attempt = attempt + 1  # Track actual attempt number (1-indexed)
             async with semaphore:
                 try:
                     resp = await client.chat.completions.create(**request_payload)
@@ -198,6 +201,7 @@ async def _infer_rows_async(
                         "sentiment_score": float(score) if score is not None else float("nan"),
                         "sentiment_confidence": float(conf) if conf is not None else float("nan"),
                         "parse_error": "",
+                        "attempts_made": last_attempt,
                     }
                 except Exception as e:
                     last_err = e
@@ -217,6 +221,7 @@ async def _infer_rows_async(
             "sentiment_score": float("nan"),
             "sentiment_confidence": float("nan"),
             "parse_error": str(last_err) if last_err else "unknown error",
+            "attempts_made": last_attempt,
         }
 
     results: list[dict[str, Any]] = []
